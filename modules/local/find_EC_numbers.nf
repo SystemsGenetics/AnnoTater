@@ -25,7 +25,7 @@ process FIND_EC_NUMBERS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        parse_enzyme.py: EnTAPnf ${workflow.manifest.version}
+        parse_enzyme.py: AnnoTater ${workflow.manifest.version}
     END_VERSIONS
     """
 }

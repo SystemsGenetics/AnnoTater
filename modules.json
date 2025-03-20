@@ -1,6 +1,6 @@
 {
-    "name": "systemsgenetics/entapnf",
-    "homePage": "https://github.com/systemsgenetics/entapnf",
+    "name": "systemsgenetics/annotater",
+    "homePage": "https://github.com/systemsgenetics/annotater",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

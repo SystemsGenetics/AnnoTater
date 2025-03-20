@@ -22,7 +22,7 @@ process INTERPROSCAN_COMBINE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        interpro_combine.py: EnTAPnf ${workflow.manifest.version}
+        interpro_combine.py: AnnoTater ${workflow.manifest.version}
     END_VERSIONS
     """
 }

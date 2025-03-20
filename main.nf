@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    systemsgenetics/entapnf
+    systemsgenetics/annotater
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/systemsgenetics/entapnf
+    Github : https://github.com/systemsgenetics/annotater
 ----------------------------------------------------------------------------------------
 */
 
@@ -30,10 +30,10 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { ENTAPNF } from './workflows/entapnf'
+include { ENTAPNF } from './workflows/annotater'
 
 //
-// WORKFLOW: Run main systemsgenetics/entapnf analysis pipeline
+// WORKFLOW: Run main systemsgenetics/annotater analysis pipeline
 //
 workflow SYSTEMSGENETICS_ENTAPNF {
     ENTAPNF ()

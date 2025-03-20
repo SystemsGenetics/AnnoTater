@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the main.nf workflow in the systemsgenetics/entapnf pipeline
+// This file holds several functions specific to the main.nf workflow in the systemsgenetics/annotater pipeline
 //
 
 class WorkflowMain {

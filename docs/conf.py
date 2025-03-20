@@ -20,7 +20,7 @@ import sys
 
 # -- Project information -----------------------------------------------------
 
-project = "EnTAPnf"
+project = "AnnoTater"
 author = ""
 
 # The short X.Y version
@@ -106,7 +106,7 @@ html_context = {
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "EnTAPnfDoc"
+htmlhelp_basename = "AnnoTaterDoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -130,7 +130,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "EnTAPnf.tex", "EnTAPnf Documentation", "Stephen Ficklin", "Josh burns", "manual"),
+    (master_doc, "AnnoTater.tex", "AnnoTater Documentation", "Stephen Ficklin", "Josh burns", "manual"),
 ]
 
 
@@ -138,7 +138,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "EnTAPnf", "EnTAPnf Documentation", [author], 1)]
+man_pages = [(master_doc, "AnnoTater", "AnnoTater Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -149,10 +149,10 @@ man_pages = [(master_doc, "EnTAPnf", "EnTAPnf Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "EnTAPnf",
-        "EnTAPnf Documentation",
+        "AnnoTater",
+        "AnnoTater Documentation",
         author,
-        "EnTAPnf",
+        "AnnoTater",
         "One line description of project.",
         "Miscellaneous",
     ),

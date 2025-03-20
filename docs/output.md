@@ -1,4 +1,4 @@
-# systemsgenetics/entapnf: Output
+# systemsgenetics/annotater: Output
 
 ## Introduction
 

@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the workflow/entapnf.nf in the systemsgenetics/entapnf pipeline
+// This file holds several functions specific to the workflow/annotater.nf in the systemsgenetics/annotater pipeline
 //
 
 import groovy.text.SimpleTemplateEngine
