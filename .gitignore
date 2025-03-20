@@ -6,5 +6,5 @@ results/
 testing/
 testing*
 *.pyc
-entap.sh
-lint.json
+null/
+.vscode
