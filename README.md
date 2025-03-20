@@ -1,41 +1,30 @@
-# EnTAPnf
+# AnnoTater
 
-[![GitHub Actions CI Status](https://github.com/systemsgenetics/entapnf/workflows/nf-core%20CI/badge.svg)](https://github.com/systemsgenetics/entapnf/actions?query=workflow%3A%22nf-core+CI%22)
-[![GitHub Actions Linting Status](https://github.com/systemsgenetics/entapnf/workflows/nf-core%20linting/badge.svg)](https://github.com/systemsgenetics/entapnf/actions?query=workflow%3A%22nf-core+linting%22)
+![AnnoTater Logo](docs/images/AnnoTater-Logo.png)
+
+[![GitHub Actions CI Status](https://github.com/systemsgenetics/annotater/workflows/nf-core%20CI/badge.svg)](https://github.com/systemsgenetics/annotater/actions?query=workflow%3A%22nf-core+CI%22)
+[![GitHub Actions Linting Status](https://github.com/systemsgenetics/annotater/workflows/nf-core%20linting/badge.svg)](https://github.com/systemsgenetics/annotater/actions?query=workflow%3A%22nf-core+linting%22)
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.10.3-23aa62.svg)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
 ## Introduction
 
-EnTAPnf is a workflow that executes the [Eukaryotic Non-Model Transcriptome Annotation Pipeline (EnTAP)](https://entap.readthedocs.io/en/latest/). EnTAP is designed to improve the accuracy, speed, and flexibility of functional gene annotation for both genomes and de novo assembled transcriptomes in non-model eukaryotes.
+AnnoTater AnnoTater is a whole or partial genome functional annotation workflow built using Nextflow. It takes a set of protein coding gene sequences (either in nucleotide or protein FASTA format) and runs InterProScan; BLAST vs UniProt SwissProt, NCBI NR, NCBI RefSeq, OrthoDB and StringDB in order to provide a first pass set of annotations for genes.  
 
-![systemsgenetics/entapnf](docs/images/ENTAP_white_250w.jpg)
+AnnoTater is constructed using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies.
 
-EnTAPnf is constructed using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies.
+### Integration with EnTAP
 
-### What EnTAPnf does?
-
-This repository provides a pipeline that does the following:
-
-1.  Generates bulk input data for EnTAP:
-    - Supports BLAST results vs NCBI nr, ExPASy SwissProt, ExPASy Tremble, NCBI RefSeq
-    - Executes InterProScan
-2.  Executes EnTAP by providing the bulk data input.
-
-### When should you use the EnTAPnf pipeline?
-
-EnTAP can run in a stand-alone manner and produce good results when the species is closely related to other species with high quality annotations in the [EggNOG](http://eggnog5.embl.de/#/app/home) database. Otherwise, more information is needed. While EnTAP does perform [Diamond](https://github.com/bbuchfink/diamond) blast on a large genome or transcriptome, other tools such as [InterProScan](https://interproscan-docs.readthedocs.io/en/latest/) can be very time consuming to run on a stand alone machine.
-
-This workflow allows you to use a high-performance cluster (HPC), Kubernetes cluster or cloud computing resources to pre-compute the bulk data needed by EnTAP.
-
-#### Protein-Protein Interaction Data
-
-EnTAPnf can also provide additional information such as potential protein-protein interactions through alignment with the orthologs provided in the [STRING](https://string-db.org/) database.
+EnTAP can run in a stand-alone manner and produce good results when the species is closely related to other species with high quality annotations in the [EggNOG](http://eggnog5.embl.de/#/app/home) database. Otherwise, more information is needed. While EnTAP does perform [Diamond](https://github.com/bbuchfink/diamond) blast on a large genome or transcriptome, other tools such as [InterProScan](https://interproscan-docs.readthedocs.io/en/latest/) can be very time consuming to run on a stand alone machine. This workflow allows you to use a high-performance cluster (HPC), Kubernetes cluster or cloud computing resources to pre-compute the bulk data needed by EnTAP.
 
 #### Integration with Tripal
 
-[Tripal](http://tripal.info) is an open-source toolkit for the construction of online genome repositories. Tripal provides infrastructure for genome databases around the world and these sites often need to refresh the functional annotations on the genomes they provide. EnTAPnf provides an easy way to allow these site to generate updated bulk data for upload to a Tripal site as well as to run EnTAP for high-quality in-silico annotations.
+[Tripal](http://tripal.info) is an open-source toolkit for the construction of online genome repositories. Tripal provides infrastructure for genome databases around the world and these sites often need to refresh the functional annotations on the genomes they provide. AnnoTater provides an easy way to allow these site to generate updated bulk data for upload to a Tripal site.
+
+#### Protein-Protein Interaction Data
+
+AnnoTater can also provide additional information such as potential protein-protein interactions through alignment with the orthologs provided in the [STRING](https://string-db.org/) database.
 
 ## Pipeline summary
 
@@ -49,7 +38,7 @@ EnTAPnf can also provide additional information such as potential protein-protei
 
 ## Quick Start
 
-1. Download databases. EnTAPnf must have available the databases. These can take quite a while to download and can consume large amounts of storage. Use the bash scripts in the `scripts` folder to retrieve and index the databases prior to using this workflow.
+1. Download databases. AnnoTater must have available the databases. These can take quite a while to download and can consume large amounts of storage. Use the bash scripts in the `scripts` folder to retrieve and index the databases prior to using this workflow.
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
 
@@ -58,7 +47,7 @@ EnTAPnf can also provide additional information such as potential protein-protei
 1. Download the pipeline and test it on a minimal dataset with a single command:
 
    ```console
-   nextflow run systemsgenetics/entapnf -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
+   nextflow run systemsgenetics/annotater -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
    ```
 
    > - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -67,7 +56,7 @@ EnTAPnf can also provide additional information such as potential protein-protei
 1. Start running your own analysis!
 
    ```console
-   nextflow run systemsgenetics/entapnf \
+   nextflow run systemsgenetics/annotater \
        -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> \
        --batch_size 100 \
        --input <fasta file> \
@@ -84,21 +73,20 @@ EnTAPnf can also provide additional information such as potential protein-protei
 
 ## Documentation
 
-The systemsgenetics/entapnf pipeline has full online [documentation](https://entapnf.readthedocs.io/en/latest/).
+The systemsgenetics/annotater pipeline has full online [documentation](https://annotater.readthedocs.io/en/latest/).
 
 ## Credits
 
-EnTAPnf was originally named AnnoTater and was written by the [Ficklin Computational Biology Team](http://ficklinlab.cahnrs.wsu.edu/) at [Washington State University](http://www.wsu.edu). Originally it was anticipated that it would provide very similar functionality as EnTAP, developed by the [Wegrzyn Plant Computational Genomics Lab](http://plantcompgenomics.com/) at the [University of Connecticut](http://www.uconn.edu). Rather than develop a competing workflow, AnnoTater was renamed to EnTAPnf and incorporates EnTAP to provide the high-quality in-silico annotations. EnTAPnf brings scalability to EnTAP.
+AnnoTater and was written by the [Ficklin Computational Biology Team](http://ficklinlab.cahnrs.wsu.edu/) at [Washington State University](http://www.wsu.edu).
 
-Development of EnTAPnf was funded by the U.S. National Science Foundation (NSF) Award [#1659300](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1659300&HistoricalAwards=false). It was funded separately from the EnTAP stand-alone tool. Please see the [EnTAP](https://entap.readthedocs.io/en/latest/) documentation for its funding sources.
-
+Development of AnnoTater was funded by the U.S. National Science Foundation (NSF) Award [#1659300](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1659300&HistoricalAwards=false). 
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
 ## Citations
 
-EnTAPnf is currently unpublished. For now, please use the GitHub URL when referencing.
+AnnoTater is currently unpublished. For now, please use the GitHub URL when referencing.
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 

@@ -118,21 +118,24 @@ def main():
         if tsv_file == tsv_combine_name:
             continue
 
-        # Import the data from each file and extract partial GO results and
-        # partial IPR results and pass the panda objects with this information
-        # to the corresponding functions
-        print("Reading file: " + tsv_file, file=sys.stderr)
+        try:
+            # Import the data from each file and extract partial GO results and
+            # partial IPR results and pass the panda objects with this information
+            # to the corresponding functions
+            print("Reading file: '{}'".format(tsv_file), file=sys.stderr)
 
-        tsv_data = pd.read_csv(tsv_file, sep="\t", header=None, names=cols)
-        go_terms = tsv_data.loc[:, [0, 13]]
-        go_terms.columns = go_headers
-        ipr_terms = tsv_data.loc[:, [0, 11, 12]]
-        ipr_terms.columns = ipr_headers
-        write_IPR(ipr_file, ipr_terms)
-        write_GO(go_file, go_terms)
+            tsv_data = pd.read_csv(tsv_file, sep="\t", header=None, names=cols)
+            go_terms = tsv_data.loc[:, [0, 13]]
+            go_terms.columns = go_headers
+            ipr_terms = tsv_data.loc[:, [0, 11, 12]]
+            ipr_terms.columns = ipr_headers
+            write_IPR(ipr_file, ipr_terms)
+            write_GO(go_file, go_terms)
 
-        # writing the contents of each tsv_file into the combined_tsv_file
-        tsv_data.to_csv(combined_tsv_file, sep="\t", mode="a", header=False, index=False)
+            # writing the contents of each tsv_file into the combined_tsv_file
+            tsv_data.to_csv(combined_tsv_file, sep="\t", mode="a", header=False, index=False)
+        except:
+            print("Problem reading '{}'. Skipping.".format(tsv_file), file=sys.stderr)
 
     ipr_file.close()
     go_file.close()
