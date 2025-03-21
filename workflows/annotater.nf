@@ -7,8 +7,8 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_annotater_pipeline'
 
-include { INTERPROSCAN as interproscan_pep } from '../modules/nf-core/interproscan'     
-include { INTERPROSCAN as interproscan_nuc } from '../modules/nf-core/interproscan'     
+include { INTERPROSCAN as interproscan_pep } from '../modules/nf-core/interproscan' addParams(seqtype: 'p')    
+include { INTERPROSCAN as interproscan_nuc } from '../modules/nf-core/interproscan' addParams(seqtype: 'n')   
 include { INTERPROSCAN_COMBINE as interproscan_combine } from '../modules/local/interproscan_combine'
 
 include { FIND_EC_NUMBERS as find_ec_numbers } from '../modules/local/find_EC_numbers'
@@ -255,29 +255,13 @@ workflow ANNOTATER {
     // InterProScan
     //
     if (params.data_ipr) {
-
+        db = file(params.data_ipr, checkIfExists: true)
         if (params.seq_type == 'pep') {
-            interproscan_pep(ch_split_seqs.ipr, params.seq_type)
-            interproscan_pep.out.outfiles
-                .map { it[1] }
-                .flatten()
-                .branch {
-                    tsv: it.getFileName().toString().endsWith(".tsv")
-                    xml: it.getFileName().toString().endsWith(".xml")
-                }
-                .set { interproscan_pep_out }
-            interproscan_combine(interproscan_pep_out.tsv.collect(), sequence_filename)
+            interproscan_pep(ch_split_seqs.ipr, db)
+            interproscan_combine(interproscan_pep.out.tsv.collect(), sequence_filename)
         }
         if (params.seq_type == 'nuc') {
-            interproscan_nuc(ch_split_seqs.ipr, params.seq_type)
-            interproscan_nuc.out.outfiles
-                .map { it[1] }
-                .flatten()
-                .branch {
-                    tsv: it.getFileName().toString().endsWith(".tsv")
-                    xml: it.getFileName().toString().endsWith(".xml")
-                }
-                .set { interproscan_nuc_out }
+            interproscan_nuc(ch_split_seqs.ipr, db)
             interproscan_combine(interproscan_nuc_out.tsv.collect(), sequence_filename)
         }
     }
