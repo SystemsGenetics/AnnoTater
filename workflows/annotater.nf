@@ -100,17 +100,18 @@ workflow ANNOTATER {
         }
     //ch_split_seqs.sprot.view()
 
-    // Houses the list of diamond database files for EnTAP
-    entap_dbs = []
+    // Houses the list of diamond database files
+    dbs = []
 
     //
     // BLAST sequences against ExPASy SwissProt using Diamond.
     //
     if (params.data_sprot) {
-        db = [ file(params.data_sprot + '/uniprot_sprot.dmnd', checkIfExists: true) ]
-        entap_dbs.add(db[0])
+        db_file = file(params.data_sprot + '/uniprot_sprot.dmnd', checkIfExists: true)
+        db = [db_file.name, db_file]
+        dbs.add(db_file)
         if (params.seq_type == 'pep') {
-            blastp_sprot(ch_split_seqs.sprot, db, 'xml', '')
+            blastp_sprot(ch_split_seqs.sprot, db, 5, '')
             if (params.enzyme_dat) {
                 find_ec_numbers(blastp_sprot.out.xml, params.enzyme_dat)
             }
@@ -122,7 +123,7 @@ workflow ANNOTATER {
             combine_blastp_sprot(blastp_sprot_txt, 'blastp', entap_sequence_filename, 'uniprot_sprot')
         }
         if (params.seq_type == 'nuc') {
-            blastx_sprot(ch_split_seqs.sprot, db, 'xml', '')
+            blastx_sprot(ch_split_seqs.sprot, db, 5, '')
             if (params.enzyme_dat) {
                 find_ec_numbers(blastx_sprot.out.xml, params.enzyme_dat)
             }
@@ -140,10 +141,11 @@ workflow ANNOTATER {
     // BLAST sequences against ExPASy tembl using Diamond.
     //
     if (params.data_trembl) {
-        db = [ file(params.data_trembl + "/uniprot_trembl.dmnd", checkIfExists: true) ]
-        entap_dbs.add(db[0])
+        db_file = file(params.data_trembl + "/uniprot_trembl.dmnd", checkIfExists: true)
+        db = [db_file.name, db_file]
+        dbs.add(db_file)
         if (params.seq_type == 'pep') {
-            blastp_data_trembl(ch_split_seqs.data_trembl, db, 'xml', '')
+            blastp_data_trembl(ch_split_seqs.data_trembl, db, 5, '')
             parse_blastp_trembl(blastp_trembl.out.xml)
             parse_blastp_trembl.out.blast_txt
                 .map { it[1] }
@@ -152,7 +154,7 @@ workflow ANNOTATER {
             combine_blastp_trembl(blastp_ntrembl_txt, 'blastp', entap_sequence_filename, 'uniprot_trembl')
         }
         if (params.seq_type == 'nuc') {
-            blastx_data_trembl(ch_split_seqs.data_trembl, db, 'xml', '')
+            blastx_data_trembl(ch_split_seqs.data_trembl, db, 5, '')
             parse_blastx_trembl(blastx_trembl.out.xml)
             parse_blastx_trembl.out.blast_txt
                 .map { it[1] }
@@ -166,10 +168,11 @@ workflow ANNOTATER {
     // BLAST sequences against NCBI nr using Diamond.
     //
     if (params.data_nr) {
-        db = [ file(params.data_nr + "/nr.dmnd", checkIfExists: true) ]
-        entap_dbs.add(db[0])
+        db_file = [ file(params.data_nr + "/nr.dmnd", checkIfExists: true) ]
+        db = [db_file.name, db_file]
+        dbs.add(db_file)
         if (params.seq_type == 'pep') {
-            blastp_nr(ch_split_seqs.nr, db, 'xml', '')
+            blastp_nr(ch_split_seqs.nr, db, 5, '')
             parse_blastp_nr(blastp_nr.out.xml)
             parse_blastp_nr.out.blast_txt
                 .map { it[1] }
@@ -178,7 +181,7 @@ workflow ANNOTATER {
             combine_blastp_nr(blastp_nr_txt, 'blastp', entap_sequence_filename, 'nr')
         }
         if (params.seq_type == 'nuc') {
-            blastx_nr(ch_split_seqs.nr, db, 'xml', '')
+            blastx_nr(ch_split_seqs.nr, db, 5, '')
             parse_blastx_nr(blastx_nr.out.xml)
             parse_blastx_nr.out.blast_txt
                 .map { it[1] }
@@ -192,10 +195,11 @@ workflow ANNOTATER {
     // BLAST sequences against NCBI refseq using Diamond.
     //
     if (params.data_refseq) {
-        db = [ file(params.data_refseq + "/refseq_plant.protein.dmnd", checkIfExists: true) ]
-        entap_dbs.add(db[0])
+        db_file = file(params.data_refseq + "/refseq_plant.protein.dmnd", checkIfExists: true)
+        db = [db_file.name, db_file]
+        dbs.add(db_file)
         if (params.seq_type == 'pep') {
-            blastp_refseq(ch_split_seqs.refseq, db, 'xml', '')
+            blastp_refseq(ch_split_seqs.refseq, db, 5, '')
             parse_blastp_refseq(blastp_refseq.out.xml)
             parse_blastp_refseq.out.blast_txt
                 .map { it[1] }
@@ -204,7 +208,7 @@ workflow ANNOTATER {
             combine_blastp_refseq(blastp_refseq_txt, 'blastp', entap_sequence_filename, 'refseq_plant')
         }
         if (params.seq_type == 'nuc') {
-            blastx_refseq(ch_split_seqs.refseq, db, 'xml', '')
+            blastx_refseq(ch_split_seqs.refseq, db, 5, '')
             parse_blastx_refseq(blastx_refseq.out.xml)
             parse_blastx_refseq.out.blast_txt
                 .map { it[1] }
@@ -218,7 +222,7 @@ workflow ANNOTATER {
     // BLAST sequences against OrthoDB using Diamond.
     //
     if (params.data_orthodb) {
-        db = [ file(params.data_orthodb, checkIfExists: true) ]
+        db = file(params.data_orthodb, checkIfExists: true)
         if (params.seq_type == 'pep') {
             blastp_orthodb(ch_split_seqs.orthodb, db, 'xml', '')
             blastp_orthodb.out.txt
@@ -239,7 +243,7 @@ workflow ANNOTATER {
     // BLAST sequences against String using Diamond.
     //
     if (params.data_string) {
-        db = [ file(params.data_string, checkIfExists: true) ]
+        db = file(params.data_string, checkIfExists: true) 
         if (params.seq_type == 'pep') {
             blastp_string(ch_split_seqs.string, db, 'xml', '')
         }

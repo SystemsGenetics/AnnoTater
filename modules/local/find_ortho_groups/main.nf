@@ -1,7 +1,7 @@
 process FIND_ORTHO_GROUPS {
     label 'process_single'
 
-    container "annotater/python:3.7-0.9"
+    container "docker.io/systemsgenetics/annotater:1.0.0-dev"
 
     input:
     path blast_xml

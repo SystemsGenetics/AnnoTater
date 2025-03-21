@@ -2,7 +2,7 @@ process FIND_EC_NUMBERS {
     tag "$meta.id"
     label 'process_single'
 
-    container "systemsgenetics/entap:flask"
+    container "docker.io/systemsgenetics/annotater:1.0.0-dev"
 
     input:
     tuple val(meta), path(blast_xml)
