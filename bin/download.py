@@ -5,78 +5,46 @@ This is the download script.
 import argparse
 import json
 import os
+import fcntl
 
-
-#
-# dictionary Contains all download tasks where each key is a single download
-# task containing a list of shell command to run in order. The key is used as
-# the directory name that is created and used for the task.
-#
-DOWNLOAD_TASKS = {}
-
-
-#
-# io.TextIOWrapper Output log file used to generated log messages whenever a
-# shell command of a task completes successfully or fails.
-#
-logfile = open("log.txt", "w")
-
-
-#
-# dictionary Contains the progress of each task where the keys are the same as
-# the DOWNLOAD TASKS dictionary but its values is just an integer for the next
-# shell command not yet done for that task.
-#
-sessionState = {}
-
-
-def defaultState():
+def get_datasets():
     """
-    Getter function.
-
-    Returns
-    -------
-    ret0 : dictionary
-        A new default session state where no task is complete.
     """
-    ret = {}
-    for key in DOWNLOAD_TASKS:
-        ret[key] = 0
-    return ret
+    IPR_VERSION='5.59-91.0'
+    PANTHER_VERSION='14.1'
+    ORTHODB_VERSION='odb12v0'
+    STRINGDB_VERSION='v12.0'
 
-
-def initializeDownloadTasks():
-    """
-    Initializes the DOWNLOAD TASKS global dictionary.
-    """
-    global DOWNLOAD_TASKS
-    DOWNLOAD_TASKS = {
+    return {
         "interproscan": {
             "dir": "interproscan",
             "script": [
-                "wget --backups=1 ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.36-75.0/interproscan-5.36-75.0-64-bit.tar.gz",
-                "tar -zxvf interproscan-5.36-75.0-64-bit.tar.gz",
+                f"wget -c ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/{IPR_VERSION}/interproscan-{IPR_VERSION}-64-bit.tar.gz",
+                f"tar -zxvf interproscan-{IPR_VERSION}-64-bit.tar.gz",
+                f"rm -f interproscan-{IPR_VERSION}-64-bit.tar.gz",
             ],
         },
         "panther": {
-            "dir": "interproscan/interproscan-5.36-75.0/data",
+            "dir": f"interproscan/interproscan-{IPR_VERSION}/data",
             "script": [
-                "wget --backups=1 ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-14.1.tar.gz",
-                "tar -zxvf panther-data-14.1.tar.gz",
+                f"wget -c ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-{PANTHER_VERSION}.tar.gz",
+                f"tar -zxvf panther-data-{PANTHER_VERSION}.tar.gz",
+                f"rm -f panther-data-{PANTHER_VERSION}.tar.gz",
             ],
         },
         "nr": {
             "dir": "nr",
             "script": [
-                "wget --backups=1 ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz",
+                "wget -c ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz",
                 "gunzip -f nr",
                 "diamond makedb --threads 4 --in nr -d nr",
+                "rm -f nr.gz",
             ],
         },
-        "refseq": {
-            "dir": "refseq",
+        "refseq_plant": {
+            "dir": "refseq_plant",
             "script": [
-                "wget --backups=1 -r -A '*.protein.faa.gz' ftp://ftp.ncbi.nlm.nih.gov/refseq/release/plant/",
+                "wget -c -r -A '*.protein.faa.gz' ftp://ftp.ncbi.nlm.nih.gov/refseq/release/plant/",
                 "gunzip -f ./ftp.ncbi.nlm.nih.gov/refseq/release/plant/*.gz",
                 "cat ./ftp.ncbi.nlm.nih.gov/refseq/release/plant/*.faa > refseq_plant.protein.faa",
                 "rm -rf ./ftp.ncbi.nlm.nih.gov/",
@@ -86,93 +54,162 @@ def initializeDownloadTasks():
         "orthodb": {
             "dir": "orthodb",
             "script": [
-                "wget --backups=1 https://v101.orthodb.org/download/odb10v1_level2species.tab.gz",
-                "gunzip -f odb10v1_level2species.tab.gz",
-                "wget https://v101.orthodb.org/download/odb10v1_OG2genes.tab.gz",
-                "gunzip -f odb10v1_OG2genes.tab.gz",
-                "wget https://v101.orthodb.org/download/odb10v1_OGs.tab.gz",
-                "gunzip -f odb10v1_OGs.tab.gz",
-                "wget https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz",
-                "gunzip -f odb10v1_all_og_fasta.tab.gz",
-                "wget https://v101.orthodb.org/download/odb10v1_OG_xrefs.tab.gz",
-                "gunzip -f odb10v1_OG_xrefs.tab.gz",
-                "wget https://v101.orthodb.org/download/odb10v1_species.tab.gz",
-                "gunzip -f odb10v1_species.tab.gz",
-                "wget https://v101.orthodb.org/download/odb10v1_gene_xrefs.tab.gz",
-                "gunzip -f odb10v1_gene_xrefs.tab.gz",
-                "/Annotater/bin/index_orthodb.py .",
-                "diamond makedb --threads 4 --in odb10v1_all_og_fasta.tab -d odb10v1_all_og",
+                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_level2species.tab.gz",
+                f"gunzip -f {ORTHODB_VERSION}_level2species.tab.gz",
+                f"rm -f {ORTHODB_VERSION}_level2species.tab.gz",
+
+                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_OG2genes.tab.gz",
+                f"gunzip -f {ORTHODB_VERSION}_OG2genes.tab.gz",
+                f"rm -f {ORTHODB_VERSION}_OG2genes.tab.gz",
+
+                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_OGs.tab.gz",
+                f"gunzip -f {ORTHODB_VERSION}_OGs.tab.gz",
+                f"rm -f {ORTHODB_VERSION}_OGs.tab.gz",
+
+                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_all_og_fasta.tab.gz",
+                f"gunzip -f {ORTHODB_VERSION}_all_og_fasta.tab.gz",
+                f"rm -f {ORTHODB_VERSION}_all_og_fasta.tab.gz",
+
+                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_OG_xrefs.tab.gz",
+                f"gunzip -f {ORTHODB_VERSION}_OG_xrefs.tab.gz",
+                f"rm -f {ORTHODB_VERSION}_OG_xrefs.tab.gz",
+
+                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_species.tab.gz",
+                f"gunzip -f {ORTHODB_VERSION}_species.tab.gz",
+                f"rm -f {ORTHODB_VERSION}_species.tab.gz",
+
+                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_gene_xrefs.tab.gz",
+                f"gunzip -f {ORTHODB_VERSION}_gene_xrefs.tab.gz",
+                f"rm -f {ORTHODB_VERSION}_gene_xrefs.tab.gz",
+
+                f"python3 ./index_orthodb.py .",
+                f"diamond makedb --threads 4 --in {ORTHODB_VERSION}_all_og_fasta.tab -d {ORTHODB_VERSION}_all_og",
             ],
         },
         "string": {
             "dir": "string",
             "script": [
-                "wget --backups=1 https://stringdb-static.org/download/protein.sequences.v11.0.fa.gz",
-                "gunzip -f protein.sequences.v11.0.fa.gz",
-                "wget https://stringdb-static.org/download/protein.links.full.v11.0.txt.gz",
-                "gunzip -f protein.links.full.v11.0.txt.gz",
-                "wget https://stringdb-static.org/download/protein.info.v11.0.txt.gz",
-                "gunzip -f protein.info.v11.0.txt.gz",
-                "/Annotater/bin/index_string.py --links protein.links.full.v11.0.txt --info protein.info.v11.0.txt --out protein",
-                "diamond makedb --threads 4 --in protein.sequences.v11.0.fa -d protein.sequences.v11.0",
+                f"wget -c https://stringdb-static.org/download/protein.sequences.{STRINGDB_VERSION}.fa.gz",
+                f"gunzip -f protein.sequences.{STRINGDB_VERSION}.fa.gz",
+                f"rm -f protein.sequences.{STRINGDB_VERSION}.fa.gz",
+
+                f"wget -c https://stringdb-static.org/download/protein.links.full.{STRINGDB_VERSION}.txt.gz",
+                f"gunzip -f protein.links.full.{STRINGDB_VERSION}.txt.gz",
+                f"rm -f protein.links.full.{STRINGDB_VERSION}.txt.gz",
+
+                f"wget -c https://stringdb-static.org/download/protein.info.{STRINGDB_VERSION}.txt.gz",
+                f"gunzip -f protein.info.{STRINGDB_VERSION}.txt.gz",
+                f"rm -f protein.info.{STRINGDB_VERSION}.txt.gz",
+
+                f"python3 ./index_string.py --links protein.links.full.{STRINGDB_VERSION}.txt --info protein.info.{STRINGDB_VERSION}.txt --out protein",
+                f"diamond makedb --threads 4 --in protein.sequences.{STRINGDB_VERSION}.fa -d protein.sequences.{STRINGDB_VERSION}",
             ],
         },
         "uniprot_sprot": {
             "dir": "uniprot_sprot",
             "script": [
-                "wget --backups=1 ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz",
+                "wget -c ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz",
                 "gunzip -f uniprot_sprot.fasta.gz",
-                "wget ftp://ftp.expasy.org/databases/enzyme/enzyme.dat",
+                "wget -c ftp://ftp.expasy.org/databases/enzyme/enzyme.dat",
                 "diamond makedb --threads 4 --in uniprot_sprot.fasta -d uniprot_sprot",
+                "rm -f uniprot_sprot.fasta.gz",
             ],
         },
         "uniprot_trembl": {
             "dir": "uniprot_trembl",
             "script": [
-                "wget --backups=1 ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz",
+                "wget -c ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz",
                 "gunzip -f uniprot_trembl.fasta.gz",
                 "diamond makedb --threads 4 --in uniprot_trembl.fasta -d uniprot_trembl",
+                "rm -f uniprot_trembl.fasta.gz"
             ],
         },
     }
 
 
-def listTasks():
+def list_datasets():
     """
-    Prints list of all possible download tasks that can be done to the user to
+    Prints list of all possible download datasets that can be done to the user to
     standard output.
     """
-    for name in DOWNLOAD_TASKS:
-        print("%s - %i tasks" % (name, len(DOWNLOAD_TASKS[name]["script"])))
+    datasets = get_datasets()
+
+    print("The following datasets are available:")
+    for name in datasets:
+        print(f" - {name}")
 
 
-def loadSession(rstList):
+def write_session(session, outdir):
+    """
+    Writes the session to a file. Uses file locking to prevent clobbering.
+    """
+
+    session_file = f"{outdir}/session.json"
+
+    with open(session_file, "w") as file:
+
+        # Acquire exclusive lock on the file
+        fcntl.flock(file.fileno(), fcntl.LOCK_EX)
+
+        # Write the session
+        file.write(json.dumps(session, indent=4) + "\n")
+
+        # Release the lock
+        fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+
+def load_session(outdir):
     """
     Loads the global session state from the session JSON file if it exists, else
     it loads a new default session state. Resets any task from the given command
     line argument string.
-
-    Parameters
-    ----------
-    rstList : string
-        Command line reset argument string that provides a list of comma
-        delimited task names that is reset.
     """
-    global sessionState
-    if not os.path.isfile("session.json") or rstList == "ALL":
-        sessionState = defaultState()
-    else:
-        with open("session.json", "r") as ifile:
-            sessionState = json.loads(ifile.read())
-        l = set((s.strip() for s in rstList.split(",") if s))
-        for key in l:
-            if key in sessionState:
-                sessionState[key] = 0
+    session_file = f"{outdir}/session.json"
+    session = {}
+
+    datasets = get_datasets()
+
+    # Open and load the session file
+    if os.path.isfile(session_file):
+        with open(session_file, "r") as file:
+            session = json.loads(file.read())
+
+    # Make sure every task has an entry in the
+    # session file.
+    for name in datasets:
+        if name not in session:
+            reset_task(name, session, outdir)
+
+    return session
 
 
-def processTask(name):
+def reset_task(name, session, outdir):
     """
-    Processes the task with the given key in the global DOWNLOAD TASKS, using
+    Resets the session for this task by setting the step back to 0 and removing the log file.
+    """
+    datasets = get_datasets()
+
+    # Set the step to 0
+    session[name] = 0
+
+    # Remove any existing log file.
+    dirPath = datasets[name]["dir"]
+    working_dir = f"{outdir}/{dirPath}"
+    log_file = f"{working_dir}/log.txt"
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
+
+def log_message(log, message):
+    """
+    Logs a message for the task.
+    """
+    print(message)
+    log.write(f"{message}\n")
+    log.flush()
+
+def process_task(name, session, outdir):
+    """
+    Processes the task with the given key in the datasets, using
     the global session state to determine where to start in the task. Any task
     that is complete is ignored and this does nothing.
 
@@ -181,58 +218,77 @@ def processTask(name):
     name : string
         Key name of the task that is processed.
     """
-    state = sessionState[name]
-    dirPath = DOWNLOAD_TASKS[name]["dir"]
-    tasks = DOWNLOAD_TASKS[name]["script"]
-    if state < len(tasks):
-        cwd = os.getcwd()
-        if not os.path.isdir(dirPath):
-            os.makedirs(dirPath)
-        os.chdir(dirPath)
-        while state < len(tasks):
-            if os.system(tasks[state]):
-                logfile.write("FAILURE: task %i of %i for %s: %s\n" % (state + 1, len(tasks), name, tasks[state]))
-                logfile.flush()
-                os.chdir(cwd)
+    state = session[name]
+    datasets = get_datasets()
+    dirPath = datasets[name]["dir"]
+    steps = datasets[name]["script"]
+
+    working_dir = f"{outdir}/{dirPath}"
+    log_file = f"{working_dir}/log.txt"
+    log = open(log_file, "a")
+
+    # Make sure the working directory exists
+    if not os.path.isdir(working_dir):
+        os.makedirs(working_dir)
+
+    # Change to the required working directory
+    os.chdir(working_dir)
+
+    log_message(log, f"Running task {name}")
+
+    # Perform the next task in the state.
+    for i in range(len(steps)):
+        if i < state:
+            log_message(log, "Previously completed step %i of %i for %s" % (i + 1, len(steps), name))
+        else:
+            step = steps[i]
+            log_message(log, f"  {step}")
+            if os.system(step):
+                log_message(log, "FAILURE: step %i of %i for %s: %s" % (i + 1, len(steps), name, step))
+                log.close()
                 return False
-            logfile.write("Successfully completed task %i of %i for %s\n" % (state + 1, len(tasks), name))
-            logfile.flush()
+            log_message(log, "Successfully completed step %i of %i for %s" % (i + 1, len(steps), name))
             state += 1
-            sessionState[name] = state
-        os.chdir(cwd)
+            session[name] = state
+
+    log_message(log, f"Successfully completed task {name}")
+    log.close()
     return True
-
-
-def saveSession():
-    """
-    Saves the global session state to the session JSON file.
-    """
-    with open("session.json", "w") as ofile:
-        ofile.write(json.dumps(sessionState, indent=4) + "\n")
 
 
 def main():
     """
     The main function
     """
-    initializeDownloadTasks()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--list", dest="isList", action="store_true")
-    parser.add_argument("--tasks", dest="whitelist", nargs="?", default=",".join(DOWNLOAD_TASKS.keys()))
-    parser.add_argument("--reset", dest="rstList", nargs="?", default="")
+    parser.add_argument("--outdir", dest='outdir', required=True, help="The directory path where the downloaded files will be stored")
+    parser.add_argument("--list", action='store_true', help="Print the list of available datasets for download")
+    parser.add_argument("--reset", action='store_true', help="By deafult, if the file exists it won't be redownloaded. Use this to force a redownload for any datasets.")
+    parser.add_argument("--datasets", dest="datasets", nargs="?", default=None, help="Perform one or more datasets. Provide a comma-separted list of task names.")
     args = parser.parse_args()
-    whitelist = set((s.strip() for s in args.whitelist.split(",") if s))
-    if args.isList:
-        listTasks()
-    else:
-        loadSession(args.rstList)
-        try:
-            for name in sessionState:
-                if name in whitelist:
-                    processTask(name)
-        finally:
-            saveSession()
 
+    # Load the session information.
+    session = load_session(args.outdir)
+
+    # Print the list of available datasets.
+    if args.list is True:
+        list_datasets()
+        return
+
+    # Run the steps for each specified task.
+    if args.datasets is not None:
+        datasets = set((s.strip() for s in args.datasets.split(",") if s))
+        try:
+            for name in datasets:
+                if args.reset is True:
+                    reset_task(name, session, args.outdir)
+                process_task(name, session, args.outdir)
+                write_session(session, args.outdir)
+        finally:
+            write_session(session, args.outdir)
+            return
+
+    parser.print_help()
 
 if __name__ == "__main__":
     main()
