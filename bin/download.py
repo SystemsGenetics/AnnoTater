@@ -12,6 +12,7 @@ def get_datasets():
     """
     IPR_VERSION='5.59-91.0'
     PANTHER_VERSION='14.1'
+    ORTHODB_MAJOR_VERSION="v12"
     ORTHODB_VERSION='odb12v0'
     STRINGDB_VERSION='v12.0'
 
@@ -54,31 +55,31 @@ def get_datasets():
         "orthodb": {
             "dir": "orthodb",
             "script": [
-                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_level2species.tab.gz",
+                f"wget -c https://data.orthodb.org/{ORTHODB_MAJOR_VERSION}/download/{ORTHODB_VERSION}_level2species.tab.gz",
                 f"gunzip -f {ORTHODB_VERSION}_level2species.tab.gz",
                 f"rm -f {ORTHODB_VERSION}_level2species.tab.gz",
 
-                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_OG2genes.tab.gz",
+                f"wget -c https://data.orthodb.org/{ORTHODB_MAJOR_VERSION}/download/{ORTHODB_VERSION}_OG2genes.tab.gz",
                 f"gunzip -f {ORTHODB_VERSION}_OG2genes.tab.gz",
                 f"rm -f {ORTHODB_VERSION}_OG2genes.tab.gz",
 
-                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_OGs.tab.gz",
+                f"wget -c https://data.orthodb.org/{ORTHODB_MAJOR_VERSION}/download/{ORTHODB_VERSION}_OGs.tab.gz",
                 f"gunzip -f {ORTHODB_VERSION}_OGs.tab.gz",
                 f"rm -f {ORTHODB_VERSION}_OGs.tab.gz",
 
-                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_all_og_fasta.tab.gz",
+                f"wget -c https://data.orthodb.org/{ORTHODB_MAJOR_VERSION}/download/{ORTHODB_VERSION}_all_og_fasta.tab.gz",
                 f"gunzip -f {ORTHODB_VERSION}_all_og_fasta.tab.gz",
                 f"rm -f {ORTHODB_VERSION}_all_og_fasta.tab.gz",
 
-                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_OG_xrefs.tab.gz",
+                f"wget -c https://data.orthodb.org/{ORTHODB_MAJOR_VERSION}/download/{ORTHODB_VERSION}_OG_xrefs.tab.gz",
                 f"gunzip -f {ORTHODB_VERSION}_OG_xrefs.tab.gz",
                 f"rm -f {ORTHODB_VERSION}_OG_xrefs.tab.gz",
 
-                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_species.tab.gz",
+                f"wget -c https://data.orthodb.org/{ORTHODB_MAJOR_VERSION}/download/{ORTHODB_VERSION}_species.tab.gz",
                 f"gunzip -f {ORTHODB_VERSION}_species.tab.gz",
                 f"rm -f {ORTHODB_VERSION}_species.tab.gz",
 
-                f"wget -c https://data.orthodb.org/download/{ORTHODB_VERSION}_gene_xrefs.tab.gz",
+                f"wget -c https://data.orthodb.org/{ORTHODB_MAJOR_VERSION}/download/{ORTHODB_VERSION}_gene_xrefs.tab.gz",
                 f"gunzip -f {ORTHODB_VERSION}_gene_xrefs.tab.gz",
                 f"rm -f {ORTHODB_VERSION}_gene_xrefs.tab.gz",
 
@@ -86,18 +87,18 @@ def get_datasets():
                 f"diamond makedb --threads 4 --in {ORTHODB_VERSION}_all_og_fasta.tab -d {ORTHODB_VERSION}_all_og",
             ],
         },
-        "string": {
-            "dir": "string",
+        "string-db": {
+            "dir": "string-db",
             "script": [
-                f"wget -c https://stringdb-static.org/download/protein.sequences.{STRINGDB_VERSION}.fa.gz",
+                f"wget -c https://stringdb-downloads.org/download/protein.sequences.{STRINGDB_VERSION}.fa.gz",
                 f"gunzip -f protein.sequences.{STRINGDB_VERSION}.fa.gz",
                 f"rm -f protein.sequences.{STRINGDB_VERSION}.fa.gz",
 
-                f"wget -c https://stringdb-static.org/download/protein.links.full.{STRINGDB_VERSION}.txt.gz",
+                f"wget -c https://stringdb-downloads.org/download/protein.links.full.{STRINGDB_VERSION}.txt.gz",
                 f"gunzip -f protein.links.full.{STRINGDB_VERSION}.txt.gz",
                 f"rm -f protein.links.full.{STRINGDB_VERSION}.txt.gz",
 
-                f"wget -c https://stringdb-static.org/download/protein.info.{STRINGDB_VERSION}.txt.gz",
+                f"wget -c https://stringdb-downloads.org/download/protein.info.{STRINGDB_VERSION}.txt.gz",
                 f"gunzip -f protein.info.{STRINGDB_VERSION}.txt.gz",
                 f"rm -f protein.info.{STRINGDB_VERSION}.txt.gz",
 
@@ -223,18 +224,17 @@ def process_task(name, session, outdir):
     dirPath = datasets[name]["dir"]
     steps = datasets[name]["script"]
 
-    working_dir = f"{outdir}/{dirPath}"
-    log_file = f"{working_dir}/log.txt"
-    log = open(log_file, "a")
-
     # Make sure the working directory exists
+    working_dir = f"{outdir}/{dirPath}"
     if not os.path.isdir(working_dir):
         os.makedirs(working_dir)
 
+    # Open the log file
+    log_file = f"{working_dir}/log.txt"
+    log = open(log_file, "a")
+
     # Change to the required working directory
     os.chdir(working_dir)
-
-    log_message(log, f"Running task {name}")
 
     # Perform the next task in the state.
     for i in range(len(steps)):
@@ -264,7 +264,7 @@ def main():
     parser.add_argument("--outdir", dest='outdir', required=True, help="The directory path where the downloaded files will be stored")
     parser.add_argument("--list", action='store_true', help="Print the list of available datasets for download")
     parser.add_argument("--reset", action='store_true', help="By deafult, if the file exists it won't be redownloaded. Use this to force a redownload for any datasets.")
-    parser.add_argument("--datasets", dest="datasets", nargs="?", default=None, help="Perform one or more datasets. Provide a comma-separted list of task names.")
+    parser.add_argument("--datasets", dest="requests", nargs="?", default=None, help="Perform one or more datasets. Provide a comma-separted list of task names.")
     args = parser.parse_args()
 
     # Load the session information.
@@ -275,15 +275,32 @@ def main():
         list_datasets()
         return
 
+    datasets = get_datasets()
     # Run the steps for each specified task.
-    if args.datasets is not None:
-        datasets = set((s.strip() for s in args.datasets.split(",") if s))
+    if args.requests is not None:
+        requests = set((s.strip() for s in args.requests.split(",") if s))
         try:
-            for name in datasets:
+            for name in requests:
+
+                # If the requested dataset doesn't exist then print an error and return
+                if name not in datasets.keys():
+                    print(f"ERROR: Uknown dataset: \"{name}\". Use the --list argument to see a list of valid datasets. ")
+                    return
+
+                # If the user wants to reset the session for this dataset do so.
                 if args.reset is True:
                     reset_task(name, session, args.outdir)
+
+                # Process the dataset
+                print(f"Processing dataset: \"{name}\"")
                 process_task(name, session, args.outdir)
+
+                # Update the session for this dataset.
                 write_session(session, args.outdir)
+
+        except Exception as error:
+            print("ERROR:", error)
+
         finally:
             write_session(session, args.outdir)
             return
