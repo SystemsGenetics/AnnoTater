@@ -7,8 +7,8 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_annotater_pipeline'
 
-include { INTERPROSCAN as interproscan_pep } from '../modules/nf-core/interproscan' addParams(seqtype: 'p')    
-include { INTERPROSCAN as interproscan_nuc } from '../modules/nf-core/interproscan' addParams(seqtype: 'n')   
+include { INTERPROSCAN as interproscan_pep } from '../modules/nf-core/interproscan' addParams(seqtype: 'p')
+include { INTERPROSCAN as interproscan_nuc } from '../modules/nf-core/interproscan' addParams(seqtype: 'n')
 include { INTERPROSCAN_COMBINE as interproscan_combine } from '../modules/local/interproscan_combine'
 
 include { FIND_EC_NUMBERS as find_ec_numbers } from '../modules/local/find_EC_numbers'
@@ -145,7 +145,7 @@ workflow ANNOTATER {
         db = [db_file.name, db_file]
         dbs.add(db_file)
         if (params.seq_type == 'pep') {
-            blastp_data_trembl(ch_split_seqs.data_trembl, db, 5, '')
+            blastp_data_trembl(ch_split_seqs.trembl, db, 5, '')
             parse_blastp_trembl(blastp_trembl.out.xml)
             parse_blastp_trembl.out.blast_txt
                 .map { it[1] }
@@ -154,7 +154,7 @@ workflow ANNOTATER {
             combine_blastp_trembl(blastp_ntrembl_txt, 'blastp', entap_sequence_filename, 'uniprot_trembl')
         }
         if (params.seq_type == 'nuc') {
-            blastx_data_trembl(ch_split_seqs.data_trembl, db, 5, '')
+            blastx_data_trembl(ch_split_seqs.trembl, db, 5, '')
             parse_blastx_trembl(blastx_trembl.out.xml)
             parse_blastx_trembl.out.blast_txt
                 .map { it[1] }
@@ -243,7 +243,7 @@ workflow ANNOTATER {
     // BLAST sequences against String using Diamond.
     //
     if (params.data_string) {
-        db = file(params.data_string, checkIfExists: true) 
+        db = file(params.data_string, checkIfExists: true)
         if (params.seq_type == 'pep') {
             blastp_string(ch_split_seqs.string, db, 'xml', '')
         }
