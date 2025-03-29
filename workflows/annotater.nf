@@ -145,7 +145,7 @@ workflow ANNOTATER {
         db = [db_file.name, db_file]
         dbs.add(db_file)
         if (params.seq_type == 'pep') {
-            blastp_data_trembl(ch_split_seqs.trembl, db, 5, '')
+            blastp_trembl(ch_split_seqs.trembl, db, 5, '')
             parse_blastp_trembl(blastp_trembl.out.xml)
             parse_blastp_trembl.out.blast_txt
                 .map { it[1] }
