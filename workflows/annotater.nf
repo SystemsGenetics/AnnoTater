@@ -151,7 +151,7 @@ workflow ANNOTATER {
                 .map { it[1] }
                 .collect()
                 .set { blastp_trembl_txt }
-            combine_blastp_trembl(blastp_ntrembl_txt, 'blastp', entap_sequence_filename, 'uniprot_trembl')
+            combine_blastp_trembl(blastp_trembl_txt, 'blastp', entap_sequence_filename, 'uniprot_trembl')
         }
         if (params.seq_type == 'nuc') {
             blastx_data_trembl(ch_split_seqs.trembl, db, 5, '')
