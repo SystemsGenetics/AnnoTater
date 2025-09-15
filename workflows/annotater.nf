@@ -258,11 +258,11 @@ workflow ANNOTATER {
         db = file(params.data_ipr, checkIfExists: true)
         if (params.seq_type == 'pep') {
             interproscan_pep(ch_split_seqs.ipr, db)
-            interproscan_combine(interproscan_pep.out.tsv.collect(), sequence_filename)
+            interproscan_combine(interproscan_pep.out.tsv.map { it[1] }.collect(), sequence_filename)
         }
         if (params.seq_type == 'nuc') {
             interproscan_nuc(ch_split_seqs.ipr, db)
-            interproscan_combine(interproscan_nuc_out.tsv.collect(), sequence_filename)
+            interproscan_combine(interproscan_nuc.out.tsv.map { it[1] }.collect(), sequence_filename)
         }
     }
 
