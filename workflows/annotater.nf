@@ -7,8 +7,8 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_annotater_pipeline'
 
-include { INTERPROSCAN as interproscan_pep } from '../modules/nf-core/interproscan' addParams(seqtype: 'p')
-include { INTERPROSCAN as interproscan_nuc } from '../modules/nf-core/interproscan' addParams(seqtype: 'n')
+include { INTERPROSCAN as interproscan_pep } from '../modules/local/interproscan' addParams(seqtype: 'p')
+include { INTERPROSCAN as interproscan_nuc } from '../modules/local/interproscan' addParams(seqtype: 'n')
 include { INTERPROSCAN_COMBINE as interproscan_combine } from '../modules/local/interproscan_combine'
 
 include { FIND_EC_NUMBERS as find_ec_numbers } from '../modules/local/find_EC_numbers'

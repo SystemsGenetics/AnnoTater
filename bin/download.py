@@ -10,7 +10,7 @@ import fcntl
 def get_datasets():
     """
     """
-    IPR_VERSION='5.59-91.0'
+    IPR_VERSION='5.75-106.0'
     PANTHER_VERSION='14.1'
     ORTHODB_MAJOR_VERSION="v12"
     ORTHODB_VERSION='odb12v0'
@@ -20,7 +20,7 @@ def get_datasets():
         "interproscan": {
             "dir": "interproscan",
             "script": [
-                f"wget -c ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/{IPR_VERSION}/interproscan-{IPR_VERSION}-64-bit.tar.gz",
+                f"wget -c https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/{IPR_VERSION}/interproscan-{IPR_VERSION}-64-bit.tar.gz",
                 f"tar -zxvf interproscan-{IPR_VERSION}-64-bit.tar.gz",
                 f"rm -f interproscan-{IPR_VERSION}-64-bit.tar.gz",
             ],
@@ -28,7 +28,7 @@ def get_datasets():
         "panther": {
             "dir": f"interproscan/interproscan-{IPR_VERSION}/data",
             "script": [
-                f"wget -c ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-{PANTHER_VERSION}.tar.gz",
+                f"wget -c https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-{PANTHER_VERSION}.tar.gz",
                 f"tar -zxvf panther-data-{PANTHER_VERSION}.tar.gz",
                 f"rm -f panther-data-{PANTHER_VERSION}.tar.gz",
             ],
