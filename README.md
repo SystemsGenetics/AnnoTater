@@ -112,16 +112,16 @@ AnnoTater produces several types of output files for functional annotation:
 The pipeline outputs are organized in the specified output directory:
 ```
 results/
-├── blast/
-│   ├── {prefix}_uniprot_sprot.blast.txt
-│   ├── {prefix}_uniprot_trembl.blast.txt
-│   ├── {prefix}_nr.blast.txt
-│   └── {prefix}_refseq_plant.blast.txt
-├── interproscan/
+├── DIAMOND/
+│   ├── blastp_{prefix}_uniprot_sprot.out
+│   ├── blastp_{prefix}_uniprot_trembl.out
+│   ├── blastp_{prefix}_nr.out
+│   └── blastp_{prefix}_refseq_plant.out
+├── InterProScan/
 │   ├── {prefix}.IPR_mappings.txt
 │   ├── {prefix}.GO_mappings.txt
 │   └── {prefix}.tsv
-├── ec_numbers/
+├── ECnumbers/
 │   └── {prefix}_EC_mappings.txt (if using SwissProt with enzyme.dat)
 ├── orthodb/
 │   └── ortholog_results/ (experimental)
@@ -133,10 +133,10 @@ results/
     └── annotater_software_versions.yml
 ```
 
-### BLAST Results
+### DIAMOND BLAST Results
 For each database searched (SwissProt, TrEMBL, NR, RefSeq), the pipeline generates:
-- **Combined BLAST results**: `{prefix}_{database}.blast.txt` - Tab-separated file containing all BLAST hits with detailed alignment information
-- **Raw BLAST XML**: Individual XML files for each batch, later combined
+- **Combined DIAMOND results**: `blastp_{prefix}_{database}.out` or `blastx_{prefix}_{database}.out` - Tab-separated file containing all BLAST hits with detailed alignment information
+- **Raw DIAMOND XML**: Individual XML files for each batch, later combined
 
 ### InterProScan Results
 InterProScan analysis produces comprehensive functional annotation files:
