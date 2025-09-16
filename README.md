@@ -117,6 +117,31 @@ AnnoTater provides the following steps:
 
 AnnoTater produces several types of output files for functional annotation:
 
+### Directory Structure
+The pipeline outputs are organized in the specified output directory:
+```
+results/
+├── blast/
+│   ├── {prefix}_uniprot_sprot.blast.txt
+│   ├── {prefix}_uniprot_trembl.blast.txt
+│   ├── {prefix}_nr.blast.txt
+│   └── {prefix}_refseq_plant.blast.txt
+├── interproscan/
+│   ├── {prefix}.IPR_mappings.txt
+│   ├── {prefix}.GO_mappings.txt
+│   └── {prefix}.tsv
+├── ec_numbers/
+│   └── {prefix}_EC_mappings.txt (if using SwissProt with enzyme.dat)
+├── orthodb/
+│   └── ortholog_results/ (experimental)
+├── string/
+│   └── interaction_results/ (experimental)
+└── pipeline_info/
+    ├── execution_report.html
+    ├── execution_timeline.html
+    └── annotater_software_versions.yml
+```
+
 ### BLAST Results
 For each database searched (SwissProt, TrEMBL, NR, RefSeq), the pipeline generates:
 - **Combined BLAST results**: `{prefix}_{database}.blast.txt` - Tab-separated file containing all BLAST hits with detailed alignment information
