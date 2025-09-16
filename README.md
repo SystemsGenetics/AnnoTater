@@ -63,6 +63,8 @@ AnnoTater provides the following steps:
    - `uniprot_trembl` - UniProt TrEMBL unreviewed proteins
 
    > **Note**: Database downloads can be very large (10s-100s of GB) and may take hours to complete. The script supports resuming interrupted downloads.
+   >
+   > **Best Practice**: On multi-user systems, it is recommended to download databases to a shared location (e.g., `/shared/databases/annotater/` or `/opt/databases/annotater/`) that is accessible to all users. This prevents duplicate downloads and saves significant storage space, as multiple users can reference the same database files in their workflow runs.
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=25.04.07`)
 
