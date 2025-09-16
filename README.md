@@ -36,20 +36,30 @@ AnnoTater provides the following steps:
 
 ## Usage
 
-1. Download databases. AnnoTater must have available the databases. These can take quite a while to download and can consume large amounts of storage. Use the `download.py` script to retrieve and index the databases prior to using this workflow:
+1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=25.04.07`)
+
+1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility ([`Conda`](https://conda.io/miniconda.html) is currently not supported); see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles)),
+
+1. Download the pipeline to access the database download script:
+
+   ```console
+   nextflow pull systemsgenetics/annotater
+   ```
+
+1. Download databases. AnnoTater requires reference databases which can take quite a while to download and consume large amounts of storage. Use the included `download.py` script to retrieve and index the databases:
 
    ```console
    # List available datasets
-   python3 bin/download.py --list --outdir /path/to/databases
+   python3 ~/.nextflow/assets/systemsgenetics/annotater/bin/download.py --list --outdir /path/to/databases
 
    # Download specific datasets (comma-separated)
-   python3 bin/download.py --outdir /path/to/databases --datasets interproscan,uniprot_sprot,nr
+   python3 ~/.nextflow/assets/systemsgenetics/annotater/bin/download.py --outdir /path/to/databases --datasets interproscan,uniprot_sprot,nr
 
    # Download all datasets
-   python3 bin/download.py --outdir /path/to/databases --datasets interproscan,panther,nr,refseq_plant,orthodb,string-db,uniprot_sprot,uniprot_trembl
+   python3 ~/.nextflow/assets/systemsgenetics/annotater/bin/download.py --outdir /path/to/databases --datasets interproscan,panther,nr,refseq_plant,orthodb,string-db,uniprot_sprot,uniprot_trembl
 
    # Force re-download if datasets already exist
-   python3 bin/download.py --outdir /path/to/databases --datasets interproscan --reset
+   python3 ~/.nextflow/assets/systemsgenetics/annotater/bin/download.py --outdir /path/to/databases --datasets interproscan --reset
    ```
 
    Available datasets include:
@@ -66,14 +76,10 @@ AnnoTater provides the following steps:
    >
    > **Best Practice**: On multi-user systems, it is recommended to download databases to a shared location (e.g., `/shared/databases/annotater/` or `/opt/databases/annotater/`) that is accessible to all users. This prevents duplicate downloads and saves significant storage space, as multiple users can reference the same database files in their workflow runs.
 
-1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=25.04.07`)
-
-1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility ([`Conda`](https://conda.io/miniconda.html) is currently not supported); see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles)),
-
-1. Download the pipeline and test it on a minimal dataset with a single command:
+1. Test the pipeline on a minimal dataset (optional but recommended):
 
    ```console
-   nextflow run systemsgenetics/annotater -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
+   nextflow run systemsgenetics/annotater -profile test,<docker/singularity/podman/shifter/charliecloud/institute>
    ```
 
    > - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -91,6 +97,21 @@ AnnoTater provides the following steps:
        --data_ipr <directory with InterProScan data>
 
    ```
+
+   **Available database arguments** (add any combination you've downloaded):
+   - `--data_ipr <path>` - InterProScan database directory
+   - `--data_sprot <path>` - UniProt Swiss-Prot database directory
+   - `--data_trembl <path>` - UniProt TrEMBL database directory
+   - `--data_nr <path>` - NCBI NR database directory
+   - `--data_refseq <path>` - NCBI RefSeq database directory
+   - `--data_orthodb <path>` - OrthoDB database directory *(experimental)*
+   - `--data_string <path>` - STRING database directory *(experimental)*
+   - `--enzyme_dat <path>` - Enzyme.dat file for EC number extraction (used with SwissProt)
+
+   **Additional options:**
+   - `--batch_size <number>` - Number of sequences to process per batch (default: 5)
+   - `--seq_type <pep|nuc>` - Input sequence type: protein or nucleotide (default: pep)
+   - `--taxonomy_ID <number>` - NCBI Taxonomy ID for the species (used by STRING database analysis)
 
 - The `--batch_size` arguments indicates the number of sequences to process in each batch.
 - It is recommended if using NCBI nr to set a large enough `--max_memory` size.
