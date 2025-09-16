@@ -4,14 +4,18 @@
 A Python script for extracting IPR terms and GO terms from the output of
 InterProScan and combining all the InterProScan output files into a single file
 
-This script extracts the different IPR terms and GO terms assigned to a gene by
-InterProScan and creates IPR_mappings and GO_mappings files with this information.
-Also it combines all the information in different .tsv files produced by
-InterProScan into a single .tsv file.
+This script:
+1. Automatically finds all *.tsv files in the current directory
+2. Extracts IPR terms and GO terms from each file
+3. Creates mapping files: {prefix}.IPR_mappings.txt and {prefix}.GO_mappings.txt
+4. Combines all TSV data into: {prefix}.tsv
+
+Usage: interpro_combine.py <output_prefix>
+Example: interpro_combine.py all.5.pep
 
 .. module:: Annotater
     :platform: UNIX, Linux
-    :synopsis: add synopsis.
+    :synopsis: Combine InterProScan outputs and extract functional annotations
 
 """
 
@@ -32,7 +36,8 @@ def write_IPR(ipr_file, ipr_terms):
 
     """
 
-    # Drop rows that has NaN in IPR column, and remove duplicates.
+    # Replace InterProScan's '-' missing values with NaN, then drop rows with missing IPR terms
+    ipr_terms = ipr_terms.replace('-', np.nan)
     ipr_terms = ipr_terms.dropna(subset=["IPR"])
     ipr_terms = ipr_terms.drop_duplicates(keep="first")
 
@@ -49,7 +54,8 @@ def write_GO(go_file, go_terms):
     :param go_terms: the pandas object with GO terms information.
     """
 
-    # Drop rows that have NaN in GO column, and remove duplicates.
+    # Replace InterProScan's '-' missing values with NaN, then drop rows with missing GO terms
+    go_terms = go_terms.replace('-', np.nan)
     go_terms = go_terms.dropna(subset=["GO"])
     go_terms = go_terms.drop_duplicates(keep="first")
 
@@ -63,10 +69,15 @@ def write_GO(go_file, go_terms):
         # Create a new empty data frame. Loop over the go_terms dataframe and append
         # gene names and each individual GO term associated with the gene to the new
         # data frame. Write this new data frame to GO_mappings file
-        go_annotations = pd.DataFrame(columns=["Gene", "GO"])
+        go_annotations_list = []
         for index, data in go_terms.iterrows():
             for terms in data["GO"]:
-                go_annotations = go_annotations.append({"Gene": data["Gene"], "GO": terms}, ignore_index=True)
+                # Remove database source annotation if present (backwards compatible)
+                # Handles formats like "GO:0005507", "GO:0005507(InterPro)", "GO:0005507(Pfam)", etc.
+                clean_go_term = re.sub(r'\([^)]*\)', '', terms)
+                go_annotations_list.append({"Gene": data["Gene"], "GO": clean_go_term})
+
+        go_annotations = pd.DataFrame(go_annotations_list)
         go_annotations = go_annotations.drop_duplicates(keep="first")
         go_annotations.to_csv(go_file, sep="\t", mode="a", header=False, index=False)
 
@@ -74,14 +85,15 @@ def write_GO(go_file, go_terms):
 def main():
 
     # Specifies the arguments for this script
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input_filename", action="store")
+    parser = argparse.ArgumentParser(description="Combine InterProScan TSV files and extract IPR/GO mappings")
+    parser.add_argument("output_prefix",
+                       help="Prefix for output files (e.g., 'all.5.pep' creates 'all.5.pep.GO_mappings.txt')")
 
     # Read in the input arguments
     args = parser.parse_args()
 
-    # Setting the prefix for output file names based on the input file name
-    file_name_prefix = args.input_filename
+    # Setting the prefix for output file names
+    file_name_prefix = args.output_prefix
 
     # Setting the file names for the output files
     tsv_combine_name = file_name_prefix + ".tsv"
