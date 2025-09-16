@@ -5,7 +5,7 @@ process INTERPROSCAN {
 
     conda "${moduleDir}/environment.yml"
     container "docker.io/interpro/interproscan:5.75-106.0"
-    containerOptions "--entrypoint=''"
+    containerOptions { workflow.containerEngine == 'docker' ? "--entrypoint=''" : '' }
 
     input:
     tuple val(meta), path(fasta)
