@@ -7,7 +7,6 @@ import argparse
 import numpy as np
 import pandas as pd
 from parse_blastxml import parseBLASTXMLfile
-from _enzymelookup import EnzymeLookup
 
 
 class EnzymeLookup:
@@ -128,18 +127,14 @@ if "Evalue" in data.columns:
         hit_parts = hit.split("|")
         rows = enzymeLookup.find(query.split()[0], hit_parts[1], hit_parts[2])
         for row in rows:
-            outdf = outdf.append(
-                pd.Series(
-                    {
-                        "Gene_ID": row[0],
-                        "SwissProt_Accession": row[1],
-                        "SwissProt_Entry_Name": row[2],
-                        "EC_Number": row[3],
-                        "EC_Description": row[4],
-                    }
-                ),
-                ignore_index=True,
-            )
+            new_row = pd.DataFrame({
+                "Gene_ID": [row[0]],
+                "SwissProt_Accession": [row[1]],
+                "SwissProt_Entry_Name": [row[2]],
+                "EC_Number": [row[3]],
+                "EC_Description": [row[4]]
+            })
+            outdf = pd.concat([outdf, new_row], ignore_index=True)
 
 outdf.drop_duplicates(inplace=True)
 outdf.to_csv(args.outPath, sep="\t", index=False)
