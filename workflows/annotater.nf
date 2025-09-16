@@ -12,6 +12,7 @@ include { INTERPROSCAN as interproscan_nuc } from '../modules/local/interproscan
 include { INTERPROSCAN_COMBINE as interproscan_combine } from '../modules/local/interproscan_combine'
 
 include { FIND_EC_NUMBERS as find_ec_numbers } from '../modules/local/find_EC_numbers'
+include { EC_COMBINE as ec_combine } from '../modules/local/ec_combine'
 include { FIND_ORTHO_GROUPS as find_ortho_groups } from '../modules/local/find_ortho_groups'
 
 include { DIAMOND_BLASTP as blastp_sprot } from '../modules/nf-core/diamond/blastp'
@@ -114,6 +115,11 @@ workflow ANNOTATER {
             blastp_sprot(ch_split_seqs.sprot, db, 5, '')
             if (params.enzyme_dat) {
                 find_ec_numbers(blastp_sprot.out.xml, params.enzyme_dat)
+                find_ec_numbers.out.ecout
+                    .map { it[1] }
+                    .collect()
+                    .set { blastp_sprot_ec }
+                ec_combine(blastp_sprot_ec, sequence_filename)
             }
             parse_blastp_sprot(blastp_sprot.out.xml)
             parse_blastp_sprot.out.blast_txt
@@ -126,6 +132,11 @@ workflow ANNOTATER {
             blastx_sprot(ch_split_seqs.sprot, db, 5, '')
             if (params.enzyme_dat) {
                 find_ec_numbers(blastx_sprot.out.xml, params.enzyme_dat)
+                find_ec_numbers.out.ecout
+                    .map { it[1] }
+                    .collect()
+                    .set { blastx_sprot_ec }
+                ec_combine(blastx_sprot_ec, sequence_filename)
             }
             parse_blastx_sprot(blastx_sprot.out.xml)
             parse_blastx_sprot.out.blast_txt
