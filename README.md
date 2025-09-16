@@ -113,9 +113,6 @@ AnnoTater provides the following steps:
    - `--seq_type <pep|nuc>` - Input sequence type: protein or nucleotide (default: pep)
    - `--taxonomy_ID <number>` - NCBI Taxonomy ID for the species (used by STRING database analysis)
 
-- The `--batch_size` arguments indicates the number of sequences to process in each batch.
-- It is recommended if using NCBI nr to set a large enough `--max_memory` size.
-
 ## Output Format
 
 AnnoTater produces several types of output files for functional annotation:
