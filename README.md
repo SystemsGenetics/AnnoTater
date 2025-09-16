@@ -76,15 +76,6 @@ AnnoTater provides the following steps:
    >
    > **Best Practice**: On multi-user systems, it is recommended to download databases to a shared location (e.g., `/shared/databases/annotater/` or `/opt/databases/annotater/`) that is accessible to all users. This prevents duplicate downloads and saves significant storage space, as multiple users can reference the same database files in their workflow runs.
 
-1. Test the pipeline on a minimal dataset (optional but recommended):
-
-   ```console
-   nextflow run systemsgenetics/annotater -profile test,<docker/singularity/podman/shifter/charliecloud/institute>
-   ```
-
-   > - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
-   > - If you are using `singularity` then the pipeline will auto-detect this and attempt to download the Singularity images directly as opposed to performing a conversion from Docker images. If you are persistently observing issues downloading Singularity images directly due to timeout or network issues then please use the `--singularity_pull_docker_container` parameter to pull and convert the Docker image instead. Alternatively, it is highly recommended to use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to pre-download all of the required containers before running the pipeline and to set the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options to be able to store and re-use the images from a central location for future pipeline runs.
-
 1. Start running your own analysis!
 
    ```console
