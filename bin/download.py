@@ -10,7 +10,7 @@ import fcntl
 def get_datasets():
     """
     """
-    IPR_VERSION='5.59-91.0'
+    IPR_VERSION='5.75-106.0'
     PANTHER_VERSION='14.1'
     ORTHODB_MAJOR_VERSION="v12"
     ORTHODB_VERSION='odb12v0'
@@ -20,7 +20,7 @@ def get_datasets():
         "interproscan": {
             "dir": "interproscan",
             "script": [
-                f"wget -c ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/{IPR_VERSION}/interproscan-{IPR_VERSION}-64-bit.tar.gz",
+                f"wget -c https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/{IPR_VERSION}/interproscan-{IPR_VERSION}-64-bit.tar.gz",
                 f"tar -zxvf interproscan-{IPR_VERSION}-64-bit.tar.gz",
                 f"rm -f interproscan-{IPR_VERSION}-64-bit.tar.gz",
             ],
@@ -28,7 +28,7 @@ def get_datasets():
         "panther": {
             "dir": f"interproscan/interproscan-{IPR_VERSION}/data",
             "script": [
-                f"wget -c ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-{PANTHER_VERSION}.tar.gz",
+                f"wget -c https://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-{PANTHER_VERSION}.tar.gz",
                 f"tar -zxvf panther-data-{PANTHER_VERSION}.tar.gz",
                 f"rm -f panther-data-{PANTHER_VERSION}.tar.gz",
             ],
@@ -109,9 +109,9 @@ def get_datasets():
         "uniprot_sprot": {
             "dir": "uniprot_sprot",
             "script": [
-                "wget -c ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz",
+                "wget -c https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz",
                 "gunzip -f uniprot_sprot.fasta.gz",
-                "wget -c ftp://ftp.expasy.org/databases/enzyme/enzyme.dat",
+                "wget -c https://ftp.expasy.org/databases/enzyme/enzyme.dat",
                 "diamond makedb --threads 4 --in uniprot_sprot.fasta -d uniprot_sprot",
                 "rm -f uniprot_sprot.fasta.gz",
             ],
@@ -119,7 +119,7 @@ def get_datasets():
         "uniprot_trembl": {
             "dir": "uniprot_trembl",
             "script": [
-                "wget -c ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz",
+                "wget -c https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz",
                 "gunzip -f uniprot_trembl.fasta.gz",
                 "diamond makedb --threads 4 --in uniprot_trembl.fasta -d uniprot_trembl",
                 "rm -f uniprot_trembl.fasta.gz"
