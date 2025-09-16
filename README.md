@@ -16,7 +16,7 @@
 
 ## Introduction
 
-AnnoTater AnnoTater is a whole or partial genome functional annotation workflow built using Nextflow. It takes a set of protein coding gene sequences (either in nucleotide or protein FASTA format) and runs InterProScan; BLAST vs UniProt SwissProt, NCBI NR, NCBI RefSeq, OrthoDB and StringDB in order to provide a first pass set of annotations for genes.  
+AnnoTater AnnoTater is a whole or partial genome functional annotation workflow built using Nextflow. It takes a set of protein coding gene sequences (either in nucleotide or protein FASTA format) and runs InterProScan; BLAST vs UniProt SwissProt, NCBI NR, NCBI RefSeq, OrthoDB and StringDB in order to provide a first pass set of annotations for genes.
 
 AnnoTater is constructed using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies.
 
@@ -36,9 +36,35 @@ AnnoTater provides the following steps:
 
 ## Usage
 
-1. Download databases. AnnoTater must have available the databases. These can take quite a while to download and can consume large amounts of storage. Use the bash scripts in the `scripts` folder to retrieve and index the databases prior to using this workflow.
+1. Download databases. AnnoTater must have available the databases. These can take quite a while to download and can consume large amounts of storage. Use the `download.py` script to retrieve and index the databases prior to using this workflow:
 
-1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
+   ```console
+   # List available datasets
+   python3 bin/download.py --list --outdir /path/to/databases
+
+   # Download specific datasets (comma-separated)
+   python3 bin/download.py --outdir /path/to/databases --datasets interproscan,uniprot_sprot,nr
+
+   # Download all datasets
+   python3 bin/download.py --outdir /path/to/databases --datasets interproscan,panther,nr,refseq_plant,orthodb,string-db,uniprot_sprot,uniprot_trembl
+
+   # Force re-download if datasets already exist
+   python3 bin/download.py --outdir /path/to/databases --datasets interproscan --reset
+   ```
+
+   Available datasets include:
+   - `interproscan` - InterProScan 5.75-106.0 with protein domain databases
+   - `panther` - PANTHER database for InterProScan
+   - `nr` - NCBI Non-Redundant protein database
+   - `refseq_plant` - NCBI RefSeq plant protein sequences
+   - `orthodb` - OrthoDB orthologous protein groups *(analysis under construction)*
+   - `string-db` - STRING database protein interactions *(analysis under construction)*
+   - `uniprot_sprot` - UniProt Swiss-Prot curated proteins
+   - `uniprot_trembl` - UniProt TrEMBL unreviewed proteins
+
+   > **Note**: Database downloads can be very large (10s-100s of GB) and may take hours to complete. The script supports resuming interrupted downloads.
+
+1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=25.04.07`)
 
 1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility ([`Conda`](https://conda.io/miniconda.html) is currently not supported); see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles)),
 
@@ -60,14 +86,44 @@ AnnoTater provides the following steps:
        --input <fasta file> \
        --data_sprot <directory with swissprot diamond index> \
        --data_refseq <directory with refseq diamond index> \
-       --data_ipr <directory with InterProScan data> \
-       --max_cpus 10 \
-       --max_memory 6GB
+       --data_ipr <directory with InterProScan data>
 
    ```
 
 - The `--batch_size` arguments indicates the number of sequences to process in each batch.
 - It is recommended if using NCBI nr to set a large enough `--max_memory` size.
+
+## Output Format
+
+AnnoTater produces several types of output files for functional annotation:
+
+### BLAST Results
+For each database searched (SwissProt, TrEMBL, NR, RefSeq), the pipeline generates:
+- **Combined BLAST results**: `{prefix}_{database}.blast.txt` - Tab-separated file containing all BLAST hits with detailed alignment information
+- **Raw BLAST XML**: Individual XML files for each batch, later combined
+
+### InterProScan Results
+InterProScan analysis produces comprehensive functional annotation files:
+- **IPR mappings**: `{prefix}.IPR_mappings.txt` - Tab-separated file mapping genes to InterPro entries
+  ```
+  Gene            IPR         Description
+  LOC_Os01g01010  IPR001841   Zinc finger, RING-type
+  LOC_Os01g01010  IPR013083   Zinc finger, RING/FYVE/PHD-type
+  ```
+
+- **GO mappings**: `{prefix}.GO_mappings.txt` - Tab-separated file mapping genes to Gene Ontology terms
+  ```
+  Gene            GO
+  LOC_Os01g01010  GO:0005507
+  LOC_Os01g01010  GO:0016491
+  ```
+
+- **Combined TSV**: `{prefix}.tsv` - Complete InterProScan output with all annotations including domains, signatures, and functional classifications
+
+### Database-Specific Notes
+- **OrthoDB analysis**: *Currently under construction*
+- **STRING database analysis**: *Currently under construction*
+- **EC number extraction**: Generated when using SwissProt database with enzyme.dat file
 
 
 > [!WARNING]
@@ -75,7 +131,7 @@ AnnoTater provides the following steps:
 
 ## Credits
 
-AnnoTater and was written by the [Ficklin Computational Biology Team](http://ficklinlab.cahnrs.wsu.edu/) at [Washington State University](http://www.wsu.edu). Development of AnnoTater was initially funded by the U.S. National Science Foundation (NSF) Award [#1659300](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1659300&HistoricalAwards=false). 
+AnnoTater and was written by the [Ficklin Computational Biology Team](http://ficklinlab.cahnrs.wsu.edu/) at [Washington State University](http://www.wsu.edu). Development of AnnoTater was initially funded by the U.S. National Science Foundation (NSF) Award [#1659300](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1659300&HistoricalAwards=false).
 
 
 ## Contributions and Support
