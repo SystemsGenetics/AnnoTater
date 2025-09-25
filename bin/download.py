@@ -13,7 +13,7 @@ def get_datasets():
     IPR_VERSION='5.75-106.0'
     PANTHER_VERSION='14.1'
     ORTHODB_MAJOR_VERSION="v12"
-    ORTHODB_VERSION='odb12v0'
+    ORTHODB_VERSION='odb12v1'
     STRINGDB_VERSION='v12.0'
 
     return {

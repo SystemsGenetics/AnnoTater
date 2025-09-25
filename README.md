@@ -104,6 +104,39 @@ AnnoTater provides the following steps:
    - `--seq_type <pep|nuc>` - Input sequence type: protein or nucleotide (default: pep)
    - `--taxonomy_ID <number>` - NCBI Taxonomy ID for the species (used by STRING database analysis)
 
+## Parameters
+
+### Required Parameters
+- `--input <path>` - Path to input FASTA file containing nucleotide or protein sequences. Accepted formats: `.fa`, `.faa`, `.fna`, `.fasta`
+- `--outdir <path>` - Output directory where results will be saved
+
+### Database Parameters
+Add any combination of the databases you've downloaded:
+- `--data_ipr <path>` - InterProScan database directory
+- `--data_sprot <path>` - UniProt Swiss-Prot database directory (Diamond index)
+- `--data_trembl <path>` - UniProt TrEMBL database directory (Diamond index)
+- `--data_nr <path>` - NCBI NR database directory (Diamond index)
+- `--data_refseq <path>` - NCBI RefSeq database directory (Diamond index)
+- `--data_orthodb <path>` - OrthoDB database directory (Diamond index) *(experimental)*
+- `--data_string <path>` - STRING database directory (Diamond index) *(experimental)*
+- `--enzyme_dat <path>` - Enzyme.dat file from ExPASy for EC number extraction (used with SwissProt)
+
+### Processing Parameters
+- `--batch_size <number>` - Number of sequences to process per batch (default: 5)
+- `--seq_type <pep|nuc>` - Input sequence type: `pep` for protein or `nuc` for nucleotide (default: `pep`)
+- `--taxonomy_ID <number>` - NCBI Taxonomy ID for the species (used by STRING database analysis)
+
+### Output Parameters
+- `--email <email>` - Email address for completion summary
+- `--publish_dir_mode <mode>` - Method to save results: `symlink`, `link`, `copy`, `copyNoFollow` (default: `link`)
+
+### Standard Nextflow Parameters
+- `--help` - Display help message and exit
+- `--version` - Display version and exit
+- `-profile <profile>` - Configuration profile: `docker`, `singularity`, `conda`, etc.
+- `-resume` - Resume previous run from cached results
+- `-work-dir <path>` - Specify work directory for temporary files
+
 ## Output Format
 
 AnnoTater produces several types of output files for functional annotation:
