@@ -89,20 +89,7 @@ AnnoTater provides the following steps:
 
    ```
 
-   **Available database arguments** (add any combination you've downloaded):
-   - `--data_ipr <path>` - InterProScan database directory
-   - `--data_sprot <path>` - UniProt Swiss-Prot database directory
-   - `--data_trembl <path>` - UniProt TrEMBL database directory
-   - `--data_nr <path>` - NCBI NR database directory
-   - `--data_refseq <path>` - NCBI RefSeq database directory
-   - `--data_orthodb <path>` - OrthoDB database directory *(experimental)*
-   - `--data_string <path>` - STRING database directory *(experimental)*
-   - `--enzyme_dat <path>` - Enzyme.dat file for EC number extraction (used with SwissProt)
-
-   **Additional options:**
-   - `--batch_size <number>` - Number of sequences to process per batch (default: 5)
-   - `--seq_type <pep|nuc>` - Input sequence type: protein or nucleotide (default: pep)
-   - `--taxonomy_ID <number>` - NCBI Taxonomy ID for the species (used by STRING database analysis)
+   > See the [Parameters](#parameters) section below for a complete list of all available options.
 
 ## Parameters
 
