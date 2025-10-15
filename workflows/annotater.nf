@@ -14,6 +14,7 @@ include { INTERPROSCAN_COMBINE as interproscan_combine } from '../modules/local/
 include { FIND_EC_NUMBERS as find_ec_numbers } from '../modules/local/find_EC_numbers'
 include { EC_COMBINE as ec_combine } from '../modules/local/ec_combine'
 include { FIND_ORTHO_GROUPS as find_ortho_groups } from '../modules/local/find_ortho_groups'
+include { CLEAN_SEQUENCES as clean_sequences } from '../modules/local/clean_sequences'
 
 include { DIAMOND_BLASTP as blastp_sprot } from '../modules/nf-core/diamond/blastp'
 include { DIAMOND_BLASTX as blastx_sprot } from '../modules/nf-core/diamond/blastx'
@@ -78,13 +79,23 @@ workflow ANNOTATER {
     //
     sequence_filename = params.input.replaceFirst(/^.*\/(.*)\..+$/, '$1')
     entap_sequence_filename = params.input.replaceFirst(/^.*\/([^\.]+).*$/, '$1') + "_final"
-    ch_split_seqs = Channel
+    ch_split_seqs_raw = Channel
         .fromPath(params.input)
         .splitFasta(by: params.batch_size, file: true)
         // Add an ID for each split file which is essential the file name
         .map {
             [[id: it.getFileName()], it]
         }
+
+    //
+    // Clean sequences to remove non-IUPAC characters (e.g., asterisks, X's)
+    //
+    clean_sequences(ch_split_seqs_raw, params.seq_type)
+
+    //
+    // Create channels for different databases using cleaned sequences
+    //
+    ch_split_seqs = clean_sequences.out.fasta
         // Because we're using Diamond against many different databases
         // we need to add a quantifier to the ID to indicate the database
         // that will be used. Otherwise the output name won't indicate the
@@ -129,7 +140,7 @@ workflow ANNOTATER {
             combine_blastp_sprot(blastp_sprot_txt, 'blastp', entap_sequence_filename, 'uniprot_sprot')
         }
         if (params.seq_type == 'nuc') {
-            blastx_sprot(ch_split_seqs.sprot, db, 5, '')
+            blastx_sprot(ch_split_seqs.sprot, db, 'xml', '')
             if (params.enzyme_dat) {
                 find_ec_numbers(blastx_sprot.out.xml, params.enzyme_dat)
                 find_ec_numbers.out.ecout
@@ -165,13 +176,13 @@ workflow ANNOTATER {
             combine_blastp_trembl(blastp_trembl_txt, 'blastp', entap_sequence_filename, 'uniprot_trembl')
         }
         if (params.seq_type == 'nuc') {
-            blastx_data_trembl(ch_split_seqs.trembl, db, 5, '')
+            blastx_trembl(ch_split_seqs.trembl, db, 'xml', '')
             parse_blastx_trembl(blastx_trembl.out.xml)
             parse_blastx_trembl.out.blast_txt
                 .map { it[1] }
                 .collect()
                 .set { blastx_trembl_txt }
-            combine_blastx_trembl(blastx_ntrembl_txt, 'blastx', entap_sequence_filename, 'uniprot_trembl')
+            combine_blastx_trembl(blastx_trembl_txt, 'blastx', entap_sequence_filename, 'uniprot_trembl')
         }
     }
 
@@ -192,7 +203,7 @@ workflow ANNOTATER {
             combine_blastp_nr(blastp_nr_txt, 'blastp', entap_sequence_filename, 'nr')
         }
         if (params.seq_type == 'nuc') {
-            blastx_nr(ch_split_seqs.nr, db, 5, '')
+            blastx_nr(ch_split_seqs.nr, db, 'xml', '')
             parse_blastx_nr(blastx_nr.out.xml)
             parse_blastx_nr.out.blast_txt
                 .map { it[1] }
@@ -219,7 +230,7 @@ workflow ANNOTATER {
             combine_blastp_refseq(blastp_refseq_txt, 'blastp', entap_sequence_filename, 'refseq_plant')
         }
         if (params.seq_type == 'nuc') {
-            blastx_refseq(ch_split_seqs.refseq, db, 5, '')
+            blastx_refseq(ch_split_seqs.refseq, db, 'xml', '')
             parse_blastx_refseq(blastx_refseq.out.xml)
             parse_blastx_refseq.out.blast_txt
                 .map { it[1] }
